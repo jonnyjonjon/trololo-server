@@ -1,15 +1,13 @@
-enablePlugins(JavaAppPackaging)
-
-name := "akka-http-microservice"
-organization := "com.theiterators"
+name := "trololo-server"
+organization := "com.jonathanmorabito"
 version := "1.0"
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.11"
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
 libraryDependencies ++= {
-  val akkaV       = "2.4.16"
-  val akkaHttpV   = "10.0.1"
+  val akkaV       = "2.4.19"
+  val akkaHttpV   = "10.0.8"
   val scalaTestV  = "3.0.1"
   Seq(
     "com.typesafe.akka" %% "akka-actor" % akkaV,
@@ -21,5 +19,3 @@ libraryDependencies ++= {
     "org.scalatest"     %% "scalatest" % scalaTestV % "test"
   )
 }
-
-Revolver.settings
