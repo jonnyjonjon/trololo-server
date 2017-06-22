@@ -1,3 +1,5 @@
+enablePlugins(JavaAppPackaging)
+
 name := "trololo-server"
 organization := "com.jonathanmorabito"
 version := "1.0"
@@ -19,3 +21,5 @@ libraryDependencies ++= {
     "org.scalatest"     %% "scalatest" % scalaTestV % "test"
   )
 }
+
+Revolver.settings
