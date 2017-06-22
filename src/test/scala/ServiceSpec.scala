@@ -11,12 +11,4 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
   "Service" should "respond to single trololo query" in {
 
   }
-
-  it should "respond to trololo pair query" in {
-
-  }
-
-  it should "respond with bad request on incorrect trololo format" in {
-
-  }
 }
