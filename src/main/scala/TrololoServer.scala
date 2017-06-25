@@ -69,7 +69,7 @@ trait Service extends Protocols {
   }
 
   def isPrivateIp(ip: String): Try[Boolean] = {
-    Try(new InetAddress(ip)).map(_.isSiteLocalAddress)
+    Try(InetAddress.getByName(ip)).map(_.isSiteLocalAddress)
   }
 
   val routes = {
