@@ -1,10 +1,12 @@
+import java.net.{InetAddress, UnknownHostException}
+
 import akka.actor.ActorSystem
-import akka.event.{LoggingAdapter, Logging}
+import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.client.RequestBuilding
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{HttpResponse, HttpRequest}
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.Unmarshal
@@ -15,6 +17,7 @@ import com.typesafe.config.ConfigFactory
 import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.util.{Failure, Success, Try}
 
 case class IpInfo(query: String,
                   status: String,
@@ -65,22 +68,32 @@ trait Service extends Protocols {
     }
   }
 
+  def isPrivateIp(ip: String): Try[Boolean] = {
+    Try(new InetAddress(ip)).map(_.isSiteLocalAddress)
+  }
+
   val routes = {
     logRequestResult("trololo-server") {
       path("xfftest") {
         get {
           (parameters('ip.?) & optionalHeaderValueByName("X-Forwarded-For")) { (maybeIp, maybeXff) =>
             complete {
-              maybeXff match {
+              val message = maybeXff match {
                 case Some(xff) =>
-                  fetchIpInfoMessage(xff).map[ToResponseMarshallable] { message =>
-                    logger.error(message)
-                    NoContent
+                  val leftMostIp = xff.takeWhile(_ != ',')
+                  isPrivateIp(leftMostIp) match {
+                    case Success(false) =>
+                      s"success: xff header $xff parsed to ip $leftMostIp, which is not private"
+                    case Success(true) =>
+                      s"failure: xff header $xff parsed to ip $leftMostIp, which is private"
+                    case Failure(_) =>
+                      s"failure: xff header $xff parsed to ip $leftMostIp, which is an invalid address"
                   }
                 case _ =>
-                  logger.error("failure: no x-forwarded-for header to parse")
-                  NoContent
+                  "failure: no x-forwarded-for header to parse"
               }
+              logger.error(message)
+              NoContent
             }
           }
         }
