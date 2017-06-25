@@ -22,18 +22,19 @@ trait Service {
         get {
           (parameters('ip.?) & optionalHeaderValueByName("X-Forwarded-For")) { (maybeIp, maybeXff) =>
             complete {
-              maybeIp match {
+              val ipMessage = maybeIp match {
                 case Some(ip) =>
-                  logger.info(s"ip parameter value:$ip")
+                  s"ip parameter value:$ip, "
                 case _ =>
-                  logger.info(s"ip parameter missing!")
+                  s"ip parameter missing! "
               }
-              maybeXff match {
+              val xffMessage = maybeXff match {
                 case Some(xff) =>
-                  logger.info(s"xff header value:$xff")
+                  s"xff header value:$xff"
                 case _ =>
-                  logger.info(s"xff header missing!")
+                  s"xff header missing!"
               }
+              logger.error(ipMessage + xffMessage)
               // always completing with a 204 to trigger passback
               NoContent
             }
